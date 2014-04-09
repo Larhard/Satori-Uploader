@@ -75,7 +75,7 @@ def main(parser):
         problem = get_problem(contest, args.problem)
         file_path = args.file
 
-        api.submit(contest, problem, file_path)
+        api.submit(contest, problem, file_path, modify=args.modify)
 
     if args.wait:
         try:
@@ -111,4 +111,5 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--problem', help="select problem")
     parser.add_argument('-s', '--submit', action='store_true', help="submit solution")
     parser.add_argument('-w', '--wait', action='store_true', help="wait for results")
+    parser.add_argument('-o', '--original', dest='modify', action='store_false', help="send original file")
     main(parser)

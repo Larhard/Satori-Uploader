@@ -97,7 +97,7 @@ class API:
             'name': entry.group(3),
         } for entry in problems]
 
-    def submit(self, contest_id, problem_id, file_path):
+    def submit(self, contest_id, problem_id, file_path, modify=False):
         """
         Submit solution for the problem
 
@@ -108,7 +108,19 @@ class API:
         mp = multipart_post_form.MultiPartForm()
         mp.add_field('problem', str(problem_id))
         file_name = re.search('([^/]|\\\\/)*$', file_path).group()
-        mp.add_file('codefile', file_name, open(file_path))
+
+        with open(file_path) as f:
+            data = f.read()
+
+        if modify:
+            if re.search('\.java$', file_name):
+                # remove package keyword
+                data = re.sub("\A(?P<commentary>(^\s*//.*$[\n\r]*)*)(?P<package>^\s*package.*$)",
+                              "\\g<commentary>//\\g<package>",
+                              data,
+                              flags=re.MULTILINE)
+
+        mp.add_file('codefile', file_name, data)
         content = mp.get_content()
 
         response = self.get_data(url, content, {

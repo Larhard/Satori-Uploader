@@ -15,8 +15,7 @@ class MultiPartForm:
     def add_field(self, name, value):
         self.fields.append((name, value))
 
-    def add_file(self, field_name, file_name, file_handle, mimetype=None):
-        data = file_handle.read()
+    def add_file(self, field_name, file_name, data, mimetype=None):
         mimetype = mimetype or mimetypes.guess_type(file_name)[0] or 'application/octet-stream'
         self.files.append((field_name, file_name, mimetype, data))
 
