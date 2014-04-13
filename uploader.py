@@ -29,9 +29,10 @@ def main(parser):
         return None
 
     def get_property(name, data):
-        result = re.match("^\\s*(//|#)\\s*@{}\\s+(?P<result>.*)\\s+$".format(name), data, flags=re.MULTILINE)
-        if result:
-            return result.group('result')
+        for line in data.splitlines():
+            res = re.match('^\\s*(//|#)\\s*@{}\\s+(?P<result>.*)\\s*$'.format(name), line)
+            if res:
+                return res.group('result')
         return None
 
     if args.file: # get data from file
@@ -39,6 +40,7 @@ def main(parser):
             data = fd.read()
             args.contest = args.contest or get_property("contest", data)
             args.problem = args.problem or get_property("problem", data)
+
 
     if args.list:
         for idx, entry in enumerate(api.get_contests()):
