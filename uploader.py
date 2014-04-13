@@ -28,6 +28,18 @@ def main(parser):
             return int(problem)
         return None
 
+    def get_property(name, data):
+        result = re.match("^\\s*(//|#)\\s*@{}\\s+(?P<result>.*)\\s+$".format(name), data, flags=re.MULTILINE)
+        if result:
+            return result.group('result')
+        return None
+
+    if args.file: # get data from file
+        with open(args.file) as fd:
+            data = fd.read()
+            args.contest = args.contest or get_property("contest", data)
+            args.problem = args.problem or get_property("problem", data)
+
     if args.list:
         for idx, entry in enumerate(api.get_contests()):
             print "{:3d} : {} ({})".format(idx, entry['name'], entry['id'])
