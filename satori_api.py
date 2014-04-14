@@ -19,6 +19,14 @@ class LoginFailedException(Exception):
     pass
 
 
+class OperationFailedException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
 class API:
     def __init__(self, login=config.SATORI_LOGIN, password=config.SATORI_PASSWORD, verbose=False,
                  *args, **kwargs):
@@ -44,9 +52,17 @@ class API:
     def __del__(self):
         self.close()
 
+    @staticmethod
+    def get_errors(data):
+        errors = []
+        for err in re.finditer('<ul class="errorlist">(.*?)</ul>', data):
+            errors.extend(re.findall('<li>(.*?)</li>', err.group()))
+        return errors
+
     def get_data(self, url, data={}, headers={}):
-        return self.opener.open(urllib2.Request(self.url + url, data if isinstance(data, str) else urlencode(data),
+        data = self.opener.open(urllib2.Request(self.url + url, data if isinstance(data, str) else urlencode(data),
                                                 headers)).read()
+        return data
 
     def get_contests(self):
         """
@@ -128,4 +144,4 @@ class API:
             'Content-length': len(content),
         })
 
-        # TODO : return value
+        return self.get_errors(response)

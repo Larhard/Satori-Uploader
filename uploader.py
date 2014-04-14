@@ -89,7 +89,11 @@ def main(parser):
         problem = get_problem(contest, args.problem)
         file_path = args.file
 
-        api.submit(contest, problem, file_path, modify=args.modify)
+        errors = api.submit(contest, problem, file_path, modify=args.modify)
+        if errors:
+            print " ::: Errors :::"
+            print "\n".join(errors)
+            return
 
     if args.wait:
         try:
