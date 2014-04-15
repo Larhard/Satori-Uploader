@@ -70,8 +70,8 @@ def main(parser):
     if args.file:  # get data from file
         with open(args.file) as fd:
             data = fd.read()
-            args.contest = args.contest or get_property(api, "contest", data)
-            args.problem = args.problem or get_property(api, "problem", data)
+            args.contest = args.contest or get_property("contest", data)
+            args.problem = args.problem or get_property("problem", data)
 
     if args.list:
         for idx, entry in enumerate(api.get_contests()):
