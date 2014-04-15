@@ -20,8 +20,9 @@ class LoginFailedException(Exception):
 
 
 class OperationFailedException(Exception):
-    def __init__(self, message):
+    def __init__(self, message=None, data=None):
         self.message = message
+        self.data = data
 
     def __str__(self):
         return self.message
@@ -53,11 +54,12 @@ class API:
         self.close()
 
     @staticmethod
-    def get_errors(data):
+    def raise_errors(data):
         errors = []
         for err in re.finditer('<ul class="errorlist">(.*?)</ul>', data):
             errors.extend(re.findall('<li>(.*?)</li>', err.group()))
-        return errors
+        if errors:
+            raise OperationFailedException(errors, data)
 
     def get_data(self, url, data={}, headers={}):
         data = self.opener.open(urllib2.Request(self.url + url, data if isinstance(data, str) else urlencode(data),
@@ -113,6 +115,40 @@ class API:
             'name': entry.group(3),
         } for entry in problems]
 
+    def get_details(self, contest_id, solution_id):
+        """
+        Get report of the solution
+
+        :rtype : {'id': , 'user': , 'code' : , 'date' : , 'status': , 'report': [{'test': , 'status': , 'time': }, ...]}
+        """
+        data = self.get_data('contest/{}/results/{}'.format(contest_id, solution_id))
+
+        self.raise_errors(data)
+
+        result = {}
+
+        res = re.search('<table class="results">.*?</tr>.*?<tr>.*?<td>(.*?)</td>.*?<td>(.*?)</td>.*?<td>(.*?)</td>.*?\
+<td>(.*?)</td>.*?<td.*?>(.*?)</td>.*?</tr>.*?</table>', data, flags=re.DOTALL)
+
+        result['id'] = res.group(1)
+        result['user'] = res.group(2)
+        result['code'] = res.group(3)
+        result['date'] = res.group(4)
+        result['status'] = res.group(5)
+
+        result['report'] = []
+        report = re.search('<h4>Checking report</h4>.*?(<td>.*?)</tbody>', data, flags=re.DOTALL)
+        if report:
+            report = report.group(1)
+            result['report'] = [{
+                'test': entry.group(1),
+                'status': entry.group(2),
+                'time': re.sub('&nbsp;', '---', entry.group(3)),
+            } for entry in re.finditer('<tr>.*?<td>(.*?)</td>.*?<td>(.*?)</td>.*?<td>(.*?)</td>.*?</tr>',
+                                       report, flags=re.DOTALL)]
+
+        return result
+
     def submit(self, contest_id, problem_id, file_path, modify=False):
         """
         Submit solution for the problem
@@ -144,4 +180,17 @@ class API:
             'Content-length': len(content),
         })
 
-        return self.get_errors(response)
+        self.raise_errors(response)
+
+        result = {}
+
+        res = re.search('<tr><td><a class="stdlink" href="/contest/(\d*)/results/(\d*)">(\d*)</a>', response)
+
+        if not res:
+            raise OperationFailedException(['undefined post-submit error'], response)
+
+        result['contest'] = res.group(1)
+        result['problem'] = res.group(2)
+        result['solution'] = res.group(3)
+
+        return result
