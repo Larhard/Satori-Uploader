@@ -4,7 +4,8 @@ from satori_api import API, LoginFailedException
 import argparse
 import re
 import time
-
+import sys
+import os
 
 def get_contest(api, contest):
     if re.match('^@\d+$', contest):
@@ -61,8 +62,27 @@ def show_details(api, contest, solution, wait, timeout):
 
 def main(parser):
     args = parser.parse_args()
+
+    sys.path.insert(0, args.config)
+
     try:
-        api = API(verbose=True)
+        import config
+    except ImportError:
+        try:
+            os.mkdir(args.config)
+        except OSError:
+            pass
+
+        with open(os.path.join(args.config, 'config.py'), 'w') as config:
+            config.write("""SATORI_LOGIN = '***'
+SATORI_PASSWORD = '***'
+SATORI_URL = 'https://satori.tcs.uj.edu.pl/'
+""")
+            print "Fill-up {} file".format(os.path.join(args.config, 'config.py'))
+            exit(0)
+
+    try:
+        api = API(login=config.SATORI_LOGIN, password=config.SATORI_PASSWORD, satori_url=config.SATORI_URL, verbose=True)
     except LoginFailedException:
         print "Login Failed"
         return
@@ -169,4 +189,5 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--wait', action='store_true', help="wait for results")
     parser.add_argument('-o', '--original', dest='modify', action='store_false', help="send original file")
     parser.add_argument('-t', '--timeout', type=int, help="wait timeout", default=10)
+    parser.add_argument('--config', help="configuration directory", default='./')
     main(parser)

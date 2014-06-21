@@ -3,17 +3,6 @@ from urllib import urlencode
 import urllib2
 import multipart_post_form
 
-try:
-    import config
-except ImportError:
-    with open('config.py', 'w') as config:
-        config.write("""SATORI_LOGIN = '***'
-SATORI_PASSWORD = '***'
-SATORI_URL = 'https://satori.tcs.uj.edu.pl/'
-""")
-        print "Fill-up config.py file"
-        exit(0)
-
 
 class LoginFailedException(Exception):
     pass
@@ -29,10 +18,10 @@ class OperationFailedException(Exception):
 
 
 class API:
-    def __init__(self, login=config.SATORI_LOGIN, password=config.SATORI_PASSWORD, verbose=False,
+    def __init__(self, login="", password="", satori_url="", verbose=False,
                  *args, **kwargs):
         self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor)
-        self.url = kwargs.get('url', config.SATORI_URL)
+        self.url = kwargs.get('url', satori_url)
 
         response = self.get_data('login', {'login': login, 'password': password})
 
