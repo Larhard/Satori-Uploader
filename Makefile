@@ -1,5 +1,5 @@
-prefix = $(DESTDIR)/usr/local
-target_dir = $(prefix)/satori-uploader
+prefix = $(DESTDIR)/usr
+target_dir = $(prefix)/share/satori-uploader
 bin_dir = $(prefix)/bin
 
 all :
@@ -13,4 +13,7 @@ install ::
 uninstall ::
 	@rm -rvf $(target_dir) $(bin_dir)/satori
 
-.PHONY : install uninstall
+clean ::
+	@git clean
+
+.PHONY : install uninstall clean
