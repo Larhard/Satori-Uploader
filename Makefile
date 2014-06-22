@@ -6,8 +6,8 @@ all :
 	@echo "Nothing to do"
 
 install ::
-	@mkdir -p $(prefix) $(bin_dir)
-	@cp -rv src $(target_dir)
+	@mkdir -p $(target_dir) $(bin_dir)
+	@cp -rv src/* $(target_dir)
 	@ln -svf $(target_dir)/satori.sh $(bin_dir)/satori
 
 uninstall ::
