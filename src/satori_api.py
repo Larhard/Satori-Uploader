@@ -126,7 +126,7 @@ class API:
         result['status'] = res.group(5)
 
         result['report'] = []
-        report = re.search('<h4>Checking report</h4>.*?(<td>.*?)</tbody>', data, flags=re.DOTALL)
+        report = re.search('<h4>Checking report</h4>.*?(<tr><td>.*?)</tbody>', data, flags=re.DOTALL)
         if report:
             report = report.group(1)
             result['report'] = [{
