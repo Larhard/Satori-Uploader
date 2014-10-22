@@ -1,6 +1,13 @@
 import re
-from urllib import urlencode
-import urllib2
+from sys import version_info
+
+if version_info.major == 2:
+    from urllib import urlencode
+    from urllib2 import build_opener, HTTPCookieProcessor, Request
+else:
+    from urllib.parse import urlencode
+    from urllib.request import build_opener, HTTPCookieProcessor, Request
+
 import multipart_post_form
 
 
@@ -20,7 +27,7 @@ class OperationFailedException(Exception):
 class API:
     def __init__(self, login="", password="", satori_url="", verbose=False,
                  *args, **kwargs):
-        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor)
+        self.opener = build_opener(HTTPCookieProcessor)
         self.url = kwargs.get('url', satori_url)
 
         response = self.get_data('login', {'login': login, 'password': password})
@@ -30,7 +37,7 @@ class API:
             raise LoginFailedException()
         self.user = self.user.group(1)
         if verbose:
-            print 'Logged as {}'.format(self.user)
+            print('Logged as {}'.format(self.user))
 
     def close(self):
         """
@@ -51,9 +58,9 @@ class API:
             raise OperationFailedException(errors, data)
 
     def get_data(self, url, data={}, headers={}):
-        data = self.opener.open(urllib2.Request(self.url + url, data if isinstance(data, str) else urlencode(data),
+        data = self.opener.open(Request(self.url + url, data.encode() if isinstance(data, str) else urlencode(data).encode(),
                                                 headers)).read()
-        return data
+        return data if version_info.major == 2 else data.decode()
 
     def get_contests(self):
         """
@@ -72,7 +79,7 @@ class API:
 
         :rtype: {'id': , 'name' , 'results': [{'id': , 'problem': , 'date': , 'status': }, ...]}
         """
-        print 'contest/{}/results'.format(contest_id)
+        print('contest/{}/results'.format(contest_id))
         data = self.get_data('contest/{}/results'.format(contest_id))
         results = re.finditer('<tr><td><a class="stdlink" href="/contest/\d*/results/(\d*)">\d*</a></td><td>([^<]*)\
 </td><td>([^<]*)</td><td class="status"><div class="submitstatus"><div class="[^"]*">([^<]*)</div></div></td></tr>',
@@ -144,7 +151,7 @@ class API:
 
         :return : True if success else False
         """
-        print contest_id, problem_id, file_path
+        print(contest_id, problem_id, file_path)
         url = self.url + 'contest/{}/submit'.format(contest_id)
         mp = multipart_post_form.MultiPartForm()
         mp.add_field('problem', str(problem_id))
@@ -164,7 +171,7 @@ class API:
                 # include local
                 includes = re.finditer('^\s*#include\s*"([^"]*)"\s*$', data, re.MULTILINE)
                 for i in includes:
-                    print i.group(1)
+                    print(i.group(1))
                     # open(i.group(1)).read()
                     data = open(i.group(1)).read().join(data.split(i.group(0)))
                     # data = open(i.group(1)).join()

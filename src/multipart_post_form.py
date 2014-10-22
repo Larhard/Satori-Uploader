@@ -1,4 +1,10 @@
-import mimetools
+from sys import version_info
+
+if version_info.major == 2:
+    from mimetools import choose_boundary as make_boundary
+else:
+    from email.generator import _make_boundary as make_boundary
+
 import mimetypes
 import itertools
 
@@ -7,7 +13,8 @@ class MultiPartForm:
     def __init__(self):
         self.fields = []
         self.files = []
-        self.boundary = mimetools.choose_boundary()
+
+        self.boundary = make_boundary()
 
     def get_content_type(self):
         return 'multipart/form-data; boundary={}'.format(self.boundary)

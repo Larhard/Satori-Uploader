@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 # coding=utf-8
 from satori_api import API, LoginFailedException
 import argparse
@@ -33,12 +33,12 @@ def get_property(name, data):
 
 def show_details(api, contest, solution, wait, timeout):
     if not solution:
-        print "Select solution"
+        print("Select solution")
         return
 
     contest = get_contest(api, contest)
     if contest is None:
-        print "Bad contest id"
+        print("Bad contest id")
         return
 
     try:
@@ -46,15 +46,15 @@ def show_details(api, contest, solution, wait, timeout):
         while waiting:
 
             data = api.get_details(contest, solution)
-            print "{} : [ {} ] ({}, {}) [{}]".format(data['code'], data['status'],
-                                                     data['user'], data['date'], data['id'])
+            print("{} : [ {} ] ({}, {}) [{}]".format(data['code'], data['status'],
+                                                     data['user'], data['date'], data['id']))
 
             for entry in data['report']:
-                print "{}\t[ {} ]\t({})".format(entry['test'], entry['status'], entry['time'])
+                print("{}\t[ {} ]\t({})".format(entry['test'], entry['status'], entry['time']))
 
             waiting = wait
             if wait:
-                print "---"
+                print("---")
                 time.sleep(timeout)
     except KeyboardInterrupt:
         pass
@@ -78,13 +78,13 @@ def main(parser):
 SATORI_PASSWORD = '***'
 SATORI_URL = 'https://satori.tcs.uj.edu.pl/'
 """)
-            print "Fill-up {} file".format(os.path.join(args.config, 'config.py'))
+            print("Fill-up {} file".format(os.path.join(args.config, 'config.py')))
             exit(0)
 
     try:
         api = API(login=config.SATORI_LOGIN, password=config.SATORI_PASSWORD, satori_url=config.SATORI_URL, verbose=True)
     except LoginFailedException:
-        print "Login Failed"
+        print("Login Failed")
         return
 
     if args.file:  # get data from file
@@ -95,48 +95,48 @@ SATORI_URL = 'https://satori.tcs.uj.edu.pl/'
 
     if args.list:
         for idx, entry in enumerate(api.get_contests()):
-            print "{:3d} : {} ({})".format(idx, entry['name'], entry['id'])
+            print("{:3d} : {} ({})".format(idx, entry['name'], entry['id']))
 
     elif args.results:
         if not args.contest:
-            print "Select contest"
+            print("Select contest")
             return
 
         contest = get_contest(api, args.contest)
         if contest is None:
-            print "Bad contest id"
+            print("Bad contest id")
             return
 
         data = api.get_results(contest)
         for entry in data['results']:
-            print "{}\t[ {} ]   \t({}) [{}]".format(entry['problem'], entry['status'], entry['date'], entry['id'])
+            print("{}\t[ {} ]   \t({}) [{}]".format(entry['problem'], entry['status'], entry['date'], entry['id']))
 
     elif args.available_problems:
         if not args.contest:
-            print "Select contest"
+            print("Select contest")
             return
 
         contest = get_contest(api, args.contest)
         if contest is None:
-            print "Bad contest id"
+            print("Bad contest id")
             return
 
         data = api.get_submittable_problems(contest)
         for idx, entry in enumerate(data):
-            print "{:3d} : {} : {}   [{}]".format(idx, entry['code'], entry['name'], entry['id'])
+            print("{:3d} : {} : {}   [{}]".format(idx, entry['code'], entry['name'], entry['id']))
 
     elif args.details:
         show_details(api, args.contest, args.solution, args.wait, args.timeout)
 
     elif args.submit:
         if not args.contest:
-            print "Select contest"
+            print("Select contest")
             return
         if not args.problem:
-            print "Select problem"
+            print("Select problem")
             return
         if not args.file:
-            print "Select file"
+            print("Select file")
             return
 
         contest = get_contest(api, args.contest)
@@ -155,19 +155,19 @@ SATORI_URL = 'https://satori.tcs.uj.edu.pl/'
         try:
             while True:
                 if not args.contest:
-                    print "Select contest"
+                    print("Select contest")
                     return
 
                 contest = get_contest(api, args.contest)
                 if contest is None:
-                    print "Bad contest id"
+                    print("Bad contest id")
                     return
 
                 data = api.get_results(contest)
                 for entry in data['results']:
-                    print "{}\t[ {} ]   \t({})".format(entry['problem'], entry['status'], entry['date'])
+                    print("{}\t[ {} ]   \t({})".format(entry['problem'], entry['status'], entry['date']))
 
-                print "---\n"
+                print("---\n")
                 time.sleep(args.timeout)
         except KeyboardInterrupt:
             pass

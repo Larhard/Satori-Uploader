@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PYTHON=python2
+PYTHON=python
 BASE_DIR=$(dirname $(readlink -e $0))
 CONFIG=$HOME/.satori-uploader/
 
