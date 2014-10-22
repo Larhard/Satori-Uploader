@@ -152,7 +152,7 @@ class API:
 
         :return : True if success else False
         """
-        print(contest_id, problem_id, file_path)
+        print("{} {} {}".format(contest_id, problem_id, file_path))
         url = self.url + 'contest/{}/submit'.format(contest_id)
         mp = multipart_post_form.MultiPartForm()
         mp.add_field('problem', str(problem_id))

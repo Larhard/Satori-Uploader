@@ -1,3 +1,5 @@
+import re
+
 def process(file_name, data):
     # TODO sed preprocessors
 
