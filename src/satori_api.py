@@ -160,7 +160,7 @@ class API:
                               "\\g<commentary>//\\g<package>",
                               data,
                               flags=re.MULTILINE)
-            if re.search('\.(c|cpp)$', file_name):
+            if re.search('\.(c|cpp|h)$', file_name):
                 # include local
                 includes = re.finditer('^\s*#include\s*"([^"]*)"\s*$', data, re.MULTILINE)
                 for i in includes:
