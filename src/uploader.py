@@ -31,7 +31,7 @@ def get_property(name, data):
     return None
 
 
-def show_details(api, contest, solution, wait, timeout):
+def show_details(api, contest, solution, wait, timeout, wait_finished_handler):
     if not solution:
         print "Select solution"
         return
@@ -52,8 +52,15 @@ def show_details(api, contest, solution, wait, timeout):
             for entry in data['report']:
                 print "{}\t[ {} ]\t({})".format(entry['test'], entry['status'], entry['time'])
 
-            waiting = wait
-            if wait:
+            if data['status'] != 'QUE':
+                if wait_finished_handler is not None:
+                    wait_finished_handler(data)
+
+                waiting = False
+            else:
+                waiting = wait
+
+            if waiting:
                 print "---"
                 time.sleep(timeout)
     except KeyboardInterrupt:
@@ -67,6 +74,10 @@ def main(parser):
 
     try:
         import config
+
+        if not hasattr(config, 'wait_finished_handler'):
+            config.wait_finished_handler = None
+
     except ImportError:
         try:
             os.mkdir(args.config)
@@ -77,6 +88,9 @@ def main(parser):
             config.write("""SATORI_LOGIN = '***'
 SATORI_PASSWORD = '***'
 SATORI_URL = 'https://satori.tcs.uj.edu.pl/'
+
+def wait_finished_handler(data):
+    pass
 """)
             print "Fill-up {} file".format(os.path.join(args.config, 'config.py'))
             exit(0)
@@ -126,7 +140,7 @@ SATORI_URL = 'https://satori.tcs.uj.edu.pl/'
             print "{:3d} : {} : {}   [{}]".format(idx, entry['code'], entry['name'], entry['id'])
 
     elif args.details:
-        show_details(api, args.contest, args.solution, args.wait, args.timeout)
+        show_details(api, args.contest, args.solution, args.wait, args.timeout, config.wait_finished_handler)
 
     elif args.submit:
         if not args.contest:
@@ -149,7 +163,7 @@ SATORI_URL = 'https://satori.tcs.uj.edu.pl/'
         args.problem = response['problem']
 
         if args.wait:
-            show_details(api, args.contest, args.solution, args.wait, args.timeout)
+            show_details(api, args.contest, args.solution, args.wait, args.timeout, config.wait_finished_handler)
 
     elif args.wait:
         try:
