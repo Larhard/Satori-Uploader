@@ -53,7 +53,7 @@ def show_details(api, contest, solution, wait, timeout, wait_finished_handler):
                 print "{}\t[ {} ]\t({})".format(entry['test'], entry['status'], entry['time'])
 
             if data['status'] != 'QUE':
-                if wait_finished_handler is not None:
+                if wait and wait_finished_handler is not None:
                     wait_finished_handler(data)
 
                 waiting = False
