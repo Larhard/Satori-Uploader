@@ -25,7 +25,7 @@ def get_problem(api, contest, problem):
 
 def get_property(name, data):
     for line in data.splitlines():
-        res = re.match('^\\s*(//|#|;)\\s*@{}\\s+(?P<result>.*)\\s*$'.format(name), line)
+        res = re.match('^\\s*(//|#|;)?\\s*@{}\\s+(?P<result>.*)\\s*$'.format(name), line)
         if res:
             return res.group('result')
     return None
